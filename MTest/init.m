@@ -13,44 +13,52 @@ Begin["`Private`"]
 (* exported *)
 
 ClearAll[Expect];
-Expect[expr_][ToBe[expected_]] := Module[{errorStr},
-	If[expr === expected,
+Expect[expr_] := Module[{result = #[expr], errorStr},
+	If[result[[2]],
 		{{"status", "Passed"}},
 		errorStr = "- expected (" <> ToString[expr] <>
-			") to be (" <> ToString[expected] <> ")";
+			") to be (" <> ToString[result[[1]]] <> ")";
 		{{"status", "Failed"}, errorStr}
 	]
-];
-Expect[expr_][NotToBe[expected_]] := Module[{errorStr},
-	If[expr =!= expected,
-		{{"status", "Passed"}},
-		errorStr = "- expected (" <> ToString[expr] <>
-			") not to be (" <> ToString[expected] <> ")";
-		{{"status", "Failed"}, errorStr}
-	]
-];
+]&;
+ClearAll[ToBe];
+ToBe[expected_] := {expected, SameQ[expected,#]}&;
+ClearAll[NotToBe];
+NotToBe[expected_] := {expected, UnsameQ[expected,#]}&;
 
 ClearAll[Ignore];
 Ignore[{{"status", _}, a_, ___}] := {{"status", "Ignore"}, a};
 
 ClearAll[It];
+It::invalidtest = "Invalid test was provided in It[\"`1`\",\[Ellipsis]] at position(s): `2`";
 It[text_String, tests__] := Module[{
-		errors = Cases[List[tests], {{"status", "Failed"}, ___}]
-		(* TODO: count non errors and compare *)
+		failed = Cases[List[tests], {{"status", "Failed"}, ___}],
+		(* get index of elements for which first entry is not of form {"status", _} *)
+		errInd= Flatten[Position[List[tests], Except[{{"status", _},___}], 1, Heads -> False]]
 	},
-	If[Length[errors] > 0,
-		{{"status", "Failed"}, text, errors[[1]][[2]]},
+	If[Length[errInd] > 0,
+		Message[It::invalidtest, text, errInd];
+	];
+	If[Length[failed] > 0,
+		{{"status", "Failed"}, text, failed[[1]][[2]]},
 		{{"status", "Passed"}, text}
 	]
 ];
 
 ClearAll[Describe];
+Describe::invalidtest = "Invalid test was provided in Describe[\"`1`\",\[Ellipsis]]"<>
+	" at position(s): `2`";
 Describe[text_String, tests__] := Module[{
-		errors = Cases[List[tests], {{"status", "Failed"}, ___}]
-		(* TODO: count non errors and compare *)
+		failed = Cases[List[tests], {{"status", "Failed"}, ___}],
+		(* TODO: DRY error handling *)
+		(* get index of elements for which first entry is not of form {"status", _} *)
+		errInd = Flatten[Position[List[tests], Except[{{"status", _},___}], 1, Heads -> False]]
 	},
+	If[Length[errInd] > 0,
+		Message[Describe::invalidtest, text, errInd];
+	];
 	{
-		If[Length[errors] == 0, {"status", "Passed"}, {"status", "Failed"}],
+		If[Length[failed] == 0, {"status", "Passed"}, {"status", "Failed"}],
 		text, tests
 	}
 ];
