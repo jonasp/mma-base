@@ -1,4 +1,4 @@
-BeginPackage["PrettySymbol`"];
+BeginPackage["Index`"];
 
 Init::usage = "";
 Create::usage = "";
@@ -12,15 +12,15 @@ Begin["`Private`"];
 ClearAll[Categories];
 Categories = {};
 
-ClearAll[GetPrettySymbolsByName];
-GetPrettySymbolsByName[_] = {};
+ClearAll[GetIndexsByName];
+GetIndexsByName[_] = {};
 
 ClearAll[Init];
-Init[category_String, PrettySymbols_List] := Module[{},
+Init[category_String, Indexs_List] := Module[{},
 	If[FreeQ[Categories, category],
 		Categories = Append[Categories, category];
 	];
-	GetPrettySymbolsByName[category] = PrettySymbols;
+	GetIndexsByName[category] = Indexs;
 ];
 
 ClearAll[SymbolVars];
@@ -37,7 +37,7 @@ GenerateRules[category_String, expr_] := Module[{
 		(* only replace symbols which appear in expression *)
 		syms = Select[SymbolVars[category], !FreeQ[expr, #]&],
 		(* take only the pretty symbols which don't show up in the expression provided *)
-		vars = Select[GetPrettySymbolsByName[category], FreeQ[expr, #]&],
+		vars = Select[GetIndexsByName[category], FreeQ[expr, #]&],
 		th
 	},
 	If[Length[syms] > Length[vars],
@@ -57,14 +57,14 @@ Prettify[exp_] := exp /. ((GenerateRules[#,exp]&/@Categories)//Flatten);
 (* HERE BE DRAGONS *)
 
 Off[General::shdw];
-ClearAll[PrettySymbol`Clear];
-PrettySymbol`Clear[category_String] := Module[{},
+ClearAll[Index`Clear];
+Index`Clear[category_String] := Module[{},
 	SymbolVars[category] = {};
 ];
-PrettySymbol`Clear[] := Module[{},(Clear/@Categories);];
+Index`Clear[] := Module[{},(Clear/@Categories);];
 On[General::shdw];
 
 End[]; (* `Private`" *)
 
-(* don't pollute global namespace with helper package *) 
+(* don't pollute global namespace with helper package *)
 Block[{$ContextPath}, EndPackage[]];
