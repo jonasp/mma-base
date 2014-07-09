@@ -32,10 +32,15 @@ Create[category_String, symbol_] := Module[{},
 ];
 Create[category_String] := Create[category, Unique[category]];
 
+ClearAll[SelectIndices];
+SelectIndices[category_String, expr_] /; MemberQ[SymbolVars[category], expr] := expr;
+SelectIndices[category_String, expr_] /; Length[expr] > 0 := Flatten[SelectIndices[category, #]& /@ (List @@ expr), 1];
+SelectIndices[category_String, expr_] = {};
+
 ClearAll[GenerateRules];
 GenerateRules[category_String, expr_] := Module[{
 		(* only replace symbols which appear in expression *)
-		syms = Select[SymbolVars[category], !FreeQ[expr, #]&],
+		syms = DeleteDuplicates[SelectIndices[category, expr]],
 		(* take only the pretty symbols which don't show up in the expression provided *)
 		vars = Select[GetIndexsByName[category], FreeQ[expr, #]&],
 		th
