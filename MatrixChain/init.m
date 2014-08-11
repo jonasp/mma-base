@@ -44,6 +44,11 @@ toComponents[tr[CenterDot[a_, b___, c_]]] /; left[a] == right[c] := Module[
 	indtype = left[a]; indrange = registeredIndex[indtype];
 	Sum[Chain[a, b, c][i, i], {i, indrange}]
 ];
+toComponents[tr[a_]] /; left[a] == right[a] := Module[
+	{indtype, indrange},
+	indtype = left[a]; indrange = registeredIndex[indtype];
+	Sum[a[i, i], {i, indrange}]
+];
 toComponents[a_] := a;
 
 ClearAll[Chain];
