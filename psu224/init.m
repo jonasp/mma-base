@@ -10,8 +10,8 @@ qb::usage = "";
 s::usage = "";
 sb::usage = "";
 
-PrettySymbol`Init["undotted", {\[Alpha], \[Beta], \[Gamma], \[Rho], \[Sigma], \[Tau], \[Kappa], \[Xi]}];
-PrettySymbol`Init["dotted", {
+Index`Init["undotted", {\[Alpha], \[Beta], \[Gamma], \[Rho], \[Sigma], \[Tau], \[Kappa], \[Xi]}];
+Index`Init["dotted", {
 	\! \(\*OverscriptBox[\(\[Alpha]\),\(.\)]\),
 	\! \(\*OverscriptBox[\(\[Beta]\),\(.\)]\),
 	\! \(\*OverscriptBox[\(\[Gamma]\),\(.\)]\),
@@ -21,7 +21,7 @@ PrettySymbol`Init["dotted", {
 	\! \(\*OverscriptBox[\(\[Kappa]\),\(.\)]\),
 	\! \(\*OverscriptBox[\(\[Xi]\),\(.\)]\)
 }];
-PrettySymbol`Init["capital", {A, B, C, D, F, G, H, K, L}];
+Index`Init["capital", {A, B, C, D, F, G, H, K, L}];
 
 Commutator::usage = "";
 AntiCommutator::usage = "";
@@ -31,25 +31,25 @@ ClearAll[p, m, mb, k, q, qb];
 p[ad_,a_] := DOp[x][a,ad];
 m[a_,b_] := With[{
 		NonCommutativeMultiply = CenterDot,
-		ad = PrettySymbol`Create["dotted"],
-		ac = PrettySymbol`Create["capital"]},
+		ad = Index`Create["dotted"],
+		ac = Index`Create["capital"]},
 	- x[a,ad] ** DOp[x][ad, b][#]
 	- \[Theta][a,ac] ** DOp[\[Theta]][ac, b][#]&
 ];
 mb[ad_, bd_] := With[{
 		NonCommutativeMultiply = CenterDot,
-		a = PrettySymbol`Create["undotted"],
-		ac = PrettySymbol`Create["capital"]
+		a = Index`Create["undotted"],
+		ac = Index`Create["capital"]
 	},
 	- x[a,ad] ** DOp[x][bd, a][#]
 	- \[Theta]b[ac,ad] ** DOp[\[Theta]b][bd,ac][#]&
 ];
 k[a_,ad_] := With[{
 		NonCommutativeMultiply = CenterDot,
-		b = PrettySymbol`Create["undotted"],
-		bd = PrettySymbol`Create["dotted"],
-		cc = PrettySymbol`Create["capital"],
-		dc = PrettySymbol`Create["capital"]
+		b = Index`Create["undotted"],
+		bd = Index`Create["dotted"],
+		cc = Index`Create["capital"],
+		dc = Index`Create["capital"]
 	},
 	x[a,bd] ** x[b,ad] ** DOp[x][bd, b][#]
 	+ x[b,ad] ** \[Theta][a,cc] ** DOp[\[Theta]][cc, b][#]
@@ -58,16 +58,16 @@ k[a_,ad_] := With[{
 ];
 q[a_,ac_] := With[{
 		NonCommutativeMultiply = CenterDot,
-		bc = PrettySymbol`Create["capital"],
-		ad = PrettySymbol`Create["dotted"]
+		bc = Index`Create["capital"],
+		ad = Index`Create["dotted"]
 	},
 	(- \[Delta][ac,bc] + y[ac,bc]) ** DOp[\[Theta]][bc,a][#]
 	+ I \[Theta]b[ac,ad] ** DOp[x][ad,a][#]&
 ];
 qb[ac_,ad_] := With[{
 		NonCommutativeMultiply = CenterDot,
-		bc = PrettySymbol`Create["capital"],
-		a = PrettySymbol`Create["undotted"]
+		bc = Index`Create["capital"],
+		a = Index`Create["undotted"]
 	},
 	(\[Delta][bc,ac] + y[bc,ac]) ** DOp[\[Theta]b][ad,bc][#]
 	- I \[Theta][a,ac] ** DOp[x][ad,a][#]&
@@ -76,10 +76,10 @@ s[ac_,a_] := With[{
 		NonCommutativeMultiply = CenterDot,
 		t = \[Theta],
 		tb = \[Theta]b,
-		b = PrettySymbol`Create["undotted"],
-		bd = PrettySymbol`Create["dotted"],
-		bc = PrettySymbol`Create["capital"],
-		cc = PrettySymbol`Create["capital"]
+		b = Index`Create["undotted"],
+		bd = Index`Create["dotted"],
+		bc = Index`Create["capital"],
+		cc = Index`Create["capital"]
 	},
 	- x[a,bd] ** (\[Delta][bc,ac] + y[bc,ac]) ** DOp[tb][bd,bc][#]
 	+ I x[a,bd] ** t[b,ac] ** DOp[x][bd,b][#]
@@ -91,10 +91,10 @@ sb[ad_,ac_] := With[{
 		NonCommutativeMultiply = CenterDot,
 		t = \[Theta],
 		tb = \[Theta]b,
-		b = PrettySymbol`Create["undotted"],
-		bd = PrettySymbol`Create["dotted"],
-		bc = PrettySymbol`Create["capital"],
-		cc = PrettySymbol`Create["capital"]
+		b = Index`Create["undotted"],
+		bd = Index`Create["dotted"],
+		bc = Index`Create["capital"],
+		cc = Index`Create["capital"]
 	},
 	x[b,ad] ** (\[Delta][ac,bc] - y[ac,bc]) ** DOp[t][bc,b][#]
 	- I x[b,ad] ** tb[ac,bd] ** DOp[x][bd,b][#]
