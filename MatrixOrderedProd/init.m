@@ -6,6 +6,7 @@ Begin["`Private`"]
 
 ClearAll[MOP];
 
+(* TODO use inner outer! *)
 MOP[a_, b_] := Module[{leftRule, rightRule, left, right},
 	leftRule = (# -> left[#]) & /@ Level[a, {2}];
 	rightRule = (# -> right[#]) & /@ Level[b, {2}];
