@@ -4,7 +4,10 @@ toComponents::usage = "Decompose into Components";
 tr::usage = "Trace of matrix chain, is not evaluated unless under toComponents";
 SmallCircle::usage = "Syntactic sugar for tr[CenterDot[...]]";
 registerMatrix::usage = "Register object with left, right or both (default) index";
-registerIndex::usage = "Register index"
+registerIndex::usage = "Register index";
+
+left::usage = "Left index of matrix object";
+right::usage = "Right index of matrix object";
 
 (*CenterDot::usage = "Write ordered Matrix products and split them into components";*)
 
@@ -49,6 +52,7 @@ toComponents[tr[a_]] /; left[a] == right[a] := Module[
 	indtype = left[a]; indrange = registeredIndex[indtype];
 	Sum[a[i, i], {i, indrange}]
 ];
+toComponents[a_] /; left[a] == "" && right[a] == "" := a[];
 toComponents[a_] := a;
 
 ClearAll[Chain];
