@@ -67,23 +67,38 @@ ClearAll[StringStyle];
 StringStyle[arg__] := ToString[Style[arg], StandardForm];
 
 ClearAll[TestPrint];
-TestPrint[s_String, _String, _Integer] := s;
-TestPrint[{"status", "Passed"}, _String, _Integer] := StringJoin[
+TestPrint[s_String, _String, _String, _Integer] := s;
+TestPrint[{"status", "Passed"}, _String, "notebook", _Integer] := StringJoin[
 	StringStyle["[", Bold],
 	StringStyle["Passed", Darker[Green], Bold],
 	StringStyle["]", Bold]
 ];
-TestPrint[{"status", "Failed"}, _String, _Integer] := StringJoin[
+TestPrint[{"status", "Failed"}, _String, "notebook", _Integer] := StringJoin[
 	StringStyle["[", Bold],
 	StringStyle["Failed", Darker[Red], Bold],
 	StringStyle["]", Bold]
 ];
-TestPrint[{"status", "Ignore"}, _String, _Integer] := StringJoin[
+TestPrint[{"status", "Ignore"}, _String, "notebook", _Integer] := StringJoin[
 	StringStyle["[", Bold],
 	StringStyle["Ignore", Darker[Yellow], Bold],
 	StringStyle["]", Bold]
 ];
-TestPrint[l_List, "all", indent_Integer] := Module[
+TestPrint[{"status", "Passed"}, _String, "terminal", _Integer] := StringJoin[
+	"[",
+	"\033[;32mPassed\033[0m",
+	"]"
+];
+TestPrint[{"status", "Failed"}, _String, "terminal", _Integer] := StringJoin[
+	"[",
+	"\033[;31mFailed\033[0m",
+	"]"
+];
+TestPrint[{"status", "Ignore"}, _String, "terminal", _Integer] := StringJoin[
+	"[",
+	"\033[;33mIgnore\033[0m",
+	"]"
+];
+TestPrint[l_List, "all", output_String, indent_Integer] := Module[
 	{
 		isIndented = (indent > 0),
 		failed = Cases[l, {{"status", "Failed"}, ___}],
@@ -93,9 +108,9 @@ TestPrint[l_List, "all", indent_Integer] := Module[
 		"\n" <> StringJoin @@ ConstantArray["\t", indent],
 		""
 	] <>StringJoin @@ Most[Flatten[Map[
-		{print[#, "all", indent + 1], " "} &, l], 1]]
+		{print[#, "all", output, indent + 1], " "} &, l], 1]]
 ];
-TestPrint[l_List, "onFail", indent_Integer] := Module[
+TestPrint[l_List, "onFail", output_String, indent_Integer] := Module[
 	{
 		isIndented = (indent > 0),
 		failed = Cases[l, {{"status", "Failed"}, ___}],
@@ -110,10 +125,11 @@ TestPrint[l_List, "onFail", indent_Integer] := Module[
 		"\n" <> StringJoin @@ ConstantArray["\t", indent],
 		""
 	] <>StringJoin @@ Most[Flatten[Map[
-		{print[#, "onFail", indent + 1], " "} &, l], 1]]
+		{print[#, "onFail", output, indent + 1], " "} &, l], 1]]
 ];
-TestPrint[x_] := TestPrint[x, "onFail", 0];
-TestPrint[x_, s_String] := TestPrint[x, s, 0];
+TestPrint[x_] := TestPrint[x, "onFail", "notebook", 0];
+TestPrint[x_, s_String] := TestPrint[x, s, "notebook", 0];
+TestPrint[x_, s_String, o_String] := TestPrint[x, s, o, 0];
 
 End[]
 
