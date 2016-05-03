@@ -1,67 +1,44 @@
 BeginPackage["NCProduct`", {"MTest`"}]
 
-CenterDot::usage = "A flat ordered product which can be expanded and simplified";
+RegisterNCProduct::usage = "Register a flat ordered product which autoexpands";
 
 Begin["`Private`"]
 
-(*ClearAll[Simplifications];*)
-(*Simplifications = {};*)
+RegisteredFunctions = {};
 
 (* exported *)
+RegisterNCProduct[fn_] := Module[{},
+	If[!MemberQ[RegisteredFunctions, fn],
 
-ClearAll[CenterDot];
-(*SetAttributes[CenterDot,{Flat}];*)
+	AppendTo[RegisteredFunctions, fn];
 
-(* flat - Attribute Flat changes Pattern matching in a weird way *)
-CenterDot[a___, CenterDot[b__], c___] := CenterDot[a,b,c];
+	(* flat - Attribute Flat changes Pattern matching in a weird way *)
+	fn[a___, fn[b__], c___] := fn[a,b,c];
 
-(* simplify single argument CenterDot *)
-CenterDot[a_] := a;
+	(* simplify single argument *)
+	fn[a_] := a;
 
-(*CenterDot/:Simplify[CenterDot[s__]] := Module[{chain},*)
-	(*chain[{}, arg_] := arg;*)
-	(*chain[l_List, arg_] := chain[Rest[l], First[l][arg]];*)
-	(*chain[Simplifications, CenterDot[s]]*)
-(*];*)
+	fn[a___, n_ b_, c___] /; NumericQ[n] := n fn[a, b, c];
+	fn[a___, n_ , b___] /; NumericQ[n] := n fn[a, b];
 
-CenterDot[a___, n_ b_, c___] /; NumberQ[n] := n CenterDot[a, b, c];
-CenterDot[a___, n_ , b___] /; NumberQ[n] := n CenterDot[a, b];
+	fn[a___, n_ b_, c___] /; NumberQ[n] := n fn[a, b, c];
+	fn[a___, n_ , b___] /; NumberQ[n] := n fn[a, b];
 
-CenterDot[a___, Plus[b_, c__], d___] := CenterDot[a,b,d] + CenterDot[a,Plus[c],d];
+	fn[a___, b_Plus, c___] := fn[a, #, c]& /@ b;
 
-(*CenterDot/:Expand[CenterDot[a_,b_+c_]] :=*)
-	(*Expand[CenterDot[a,b]]+Expand[CenterDot[a,c]];*)
-(*CenterDot/:Expand[CenterDot[a_+b_,c_]] :=*)
-	(*Expand[CenterDot[a,c]]+Expand[CenterDot[b,c]];*)
-
-(*Unprotect[Plus];*)
-(*Plus/:Simplify[CenterDot[a_, b_] + CenterDot[a_, c_]] :=*)
-	(*Simplify[CenterDot[a,(b + c)]];*)
-(*Plus/:Simplify[s__ + t__] :=*)
-	(*Simplify[Plus[s]] + Simplify[Plus[t]];*)
-(*Protect[Plus];*)
-
-(*Unprotect[Times];*)
-(*Times/:Simplify[Times[a__, CenterDot[b__], c___]] := Times[a, Simplify[CenterDot[b]], c];*)
-(*Times/:Simplify[Times[a___, CenterDot[b__], c__]] := Times[a, Simplify[CenterDot[b]], c];*)
-(*Protect[Times];*)
+	];
+];
 
 End[] (* "`Private`" *)
 
 Begin["`Test`"]
 
-With[{NonCommutativeMultiply = CenterDot},
+RegisterNCProduct[NCProd];
+
+With[{NonCommutativeMultiply = NCProd},
 ClearAll[Suite];
 Suite[] := Describe["NCProduct",
 	Describe["Ordered product",
-		Ignore @ It["should simplify",
-			Expect[Simplify[CenterDot[a,b] + CenterDot[a,c]]] @ ToBe[a**(b + c)]
-		],
-		Ignore @ It["should be expandable",
-			Expect[Expand[(a + b) ** (c + d)]] @ ToBe[
-				CenterDot[a,c] + CenterDot[b,c] + CenterDot[a,d] + CenterDot[b,d]
-			]
-		],
 		It["should auto-expand",
 			Expect[(a + b) ** c] @ ToBe[a ** c + b ** c],
 			Expect[a ** (b + c) ** d]
@@ -70,9 +47,9 @@ Suite[] := Describe["NCProduct",
 		],
 		It["should be flat",
 			Expect[(a**b)**c] @ ToBe[a**b**c],
-			Expect[a**((b**c)**d)] @ ToBe[CenterDot[a, b, c, d]],
+			Expect[a**((b**c)**d)] @ ToBe[NCProd[a, b, c, d]],
 			Expect[a**((b**c)**d**e)]
-				@ ToBe[CenterDot[a, b, c, d, e]]
+				@ ToBe[NCProd[a, b, c, d, e]]
 		],
 		It["should factor out numbers",
 			Expect[(-a)**b] @ ToBe[-(a**b)],
@@ -85,10 +62,10 @@ Suite[] := Describe["NCProduct",
 			Expect[a ** 0 ** b] @ ToBe[0]
 		],
 		It["should simplify for one argument",
-			Expect[Simplify[CenterDot[fn[b]]]] @ ToBe[fn[b]]
+			Expect[Simplify[NCProd[fn[b]]]] @ ToBe[fn[b]]
 		],
 		It["should reduce automatically for one argument",
-			Expect[CenterDot[fn[b]]] @ ToBe[fn[b]]
+			Expect[NCProd[fn[b]]] @ ToBe[fn[b]]
 		]
 	]
 ];
