@@ -7,6 +7,7 @@ TestPrint::usage = "";
 ToBe::usage = "";
 NotToBe::usage = "";
 Ignore::usage ="";
+V::usage = "";
 
 Begin["`Private`"]
 
@@ -25,6 +26,15 @@ ClearAll[ToBe];
 ToBe[expected_] := {expected, SameQ[expected,#]}&;
 ClearAll[NotToBe];
 NotToBe[expected_] := {expected, UnsameQ[expected,#]}&;
+
+
+(* ForAll *)
+ClearAll[V];
+SetAttributes[V, HoldAll];
+V[s__] := Function[e,
+  Sequence @@ Flatten[Table[e, s], Length[{s}] - 1],
+  HoldAll];
+
 
 ClearAll[Ignore];
 Ignore[{{"status", _}, a_, ___}] := {{"status", "Ignore"}, a};
