@@ -21,8 +21,6 @@ Begin["`Private`"]
 
 (* exported *)
 
-ClearAll[tr];
-
 ClearAll[registeredMatrix];
 registeredMatrix = {};
 
@@ -36,6 +34,9 @@ ClearAll[registerMatrix];
 registerMatrix[o_, ind_] := AppendTo[registeredMatrix, o -> ind];
 
 ClearAll[left, right];
+left[CenterDot[l___,a_,r___]] /; left[a] === False && right[a] === False :=
+  left[CenterDot[l, r]];
+left[CenterDot[a_,___]] := left[a];
 left[o_] := Module[{p},
 	p = If[Head[o] === Symbol,
 		(o /. registeredMatrix),
@@ -46,6 +47,9 @@ left[o_] := Module[{p},
 		False
 	]
 ];
+right[CenterDot[l___,a_,r___]] /; left[a] === False && right[a] === False :=
+  right[CenterDot[l, r]];
+right[CenterDot[___,a_]] := right[a];
 right[o_] := Module[{p},
 	p = If[Head[o] === Symbol,
 		(o /. registeredMatrix),
@@ -110,11 +114,18 @@ SmallCircle /: GrassmannOddQ[SmallCircle[a__ ∘ b___]] := GrassmannOddQ[a, b];
 SmallCircle[ll___, y_?ScalarQ a_, rr___] := y SmallCircle[ll, a, rr];
 (*SmallCircle[ll___, y_?ScalarQ, rr___] := y SmallCircle[ll, rr];*)
 
+ClearAll[tr];
+tr[tr[a_]] := tr[a];
 tr[a_ + b_] := tr[a] + tr[b];
 tr[n_?NumberQ a_] := n tr[a];
 tr[n_?NumberQ] := n;
 tr[a_?ScalarQ b_] := a tr[b];
 tr[a_SmallCircle] := a;
+tr[l_ · a___] /; (!left[l] || left[l] === "") && (!right[l] || right[l] === "") :=
+  l · tr[CenterDot[a]];
+tr[a___ · r_] /; (!left[r] || left[r] === "") && (!right[r] || right[r] === "") :=
+  tr[CenterDot[a]] · r;
+tr[a_] /; left[a] === "" && right[a] === "" := a;
 
 End[] (* "`Private`" *)
 
@@ -174,6 +185,11 @@ Describe["MatrixChain",
 			(*Expect[θ ∘ (ψ · θb)] @ ToBe[ψ · (θ ∘ θb)]*)
 		]
 	],
+  Describe["tr",
+    It["should move out objects without indices",
+      Expect[tr[y · a · b]] @ ToBe[y · tr[a · b]]
+    ]
+  ],
 	Describe["Left/Right",
 		It["should work for complicated objects",
 			Expect[left[a[1]]] @ ToBe[left[a]],

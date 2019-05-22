@@ -13,12 +13,17 @@ Begin["`Private`"]
 
 (* exported *)
 
+ClearAll[StringTrunc];
+StringTrunc[str_, n_] := StringTake[str, Min[StringLength[str], n]];
+
+MaxStringLength = 100;
+
 ClearAll[Expect];
 Expect[expr_] := Module[{result = #[expr], errorStr},
 	If[result[[2]],
 		{{"status", "Passed"}},
-		errorStr = "- expected (" <> ToString[expr] <>
-			") to be (" <> ToString[result[[1]]] <> ")";
+		errorStr = "- expected (" <> StringTrunc[ToString[expr], MaxStringLength] <>
+			") to be (" <> StringTrunc[ToString[result[[1]]], MaxStringLength] <> ")";
 		{{"status", "Failed"}, errorStr}
 	]
 ]&;

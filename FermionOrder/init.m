@@ -35,7 +35,7 @@ End[] (* "`Private`" *)
 Begin["`Test`"]
 
 ClearAll[Suite];
-Suite[] := Block[{GrassmannOdd, LinearFunctions},
+Suite[] := Block[{GrassmannOddVars, LinearFunctions},
 	GrassmannOddVars = {ψ, χ};
 	LinearFunctions = {d};
 

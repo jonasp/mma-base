@@ -1,12 +1,13 @@
 (* ::Package:: *)
 
 BeginPackage["OMProduct`", {"MTest`"}]
-Notation`AutoLoadNotationPalette = False;
-Needs["Notation`"];
-
-InfixNotation[ParsedBoxWrapper["⊙"], omp];
 
 omp::usage = "An ordered matrix product";
+
+(* Notation`AutoLoadNotationPalette = False; *)
+(* Needs["Notation`"]; *)
+
+(* InfixNotation[ParsedBoxWrapper["⊙"], omp]; *)
 
 CircleDot = omp;
 

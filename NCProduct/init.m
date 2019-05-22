@@ -1,6 +1,7 @@
 BeginPackage["NCProduct`", {"MTest`"}]
 
-RegisterNCProduct::usage = "Register a flat ordered product which autoexpands";
+RegisterNCProduct::usage = "Register an ordered product which autoexpands";
+FlattenNCProduct::usage = "The ordered product is flat - default: True";
 
 Begin["`Private`"]
 
@@ -8,25 +9,25 @@ RegisteredFunctions = {};
 
 (* exported *)
 RegisterNCProduct[fn_] := Module[{},
-	If[!MemberQ[RegisteredFunctions, fn],
+  If[!MemberQ[RegisteredFunctions, fn],
 
-	AppendTo[RegisteredFunctions, fn];
+  AppendTo[RegisteredFunctions, fn];
 
-	(* flat - Attribute Flat changes Pattern matching in a weird way *)
-	fn[a___, fn[b__], c___] := fn[a,b,c];
+  (* flat - Attribute Flat changes Pattern matching in a weird way *)
+  fn[a___, fn[b__], c___] := fn[a,b,c];
 
-	(* simplify single argument *)
-	fn[a_] := a;
+  (* simplify single argument *)
+  fn[a_] := a;
 
-	fn[a___, n_ b_, c___] /; NumericQ[n] := n fn[a, b, c];
-	fn[a___, n_ , b___] /; NumericQ[n] := n fn[a, b];
+  fn[a___, n_ b_, c___] /; NumericQ[n] := n fn[a, b, c];
+  fn[a___, n_ , b___] /; NumericQ[n] := n fn[a, b];
 
-	fn[a___, n_ b_, c___] /; NumberQ[n] := n fn[a, b, c];
-	fn[a___, n_ , b___] /; NumberQ[n] := n fn[a, b];
+  fn[a___, n_ b_, c___] /; NumberQ[n] := n fn[a, b, c];
+  fn[a___, n_ , b___] /; NumberQ[n] := n fn[a, b];
 
-	fn[a___, b_Plus, c___] := fn[a, #, c]& /@ b;
+  fn[a___, b_Plus, c___] := fn[a, #, c]& /@ b;
 
-	];
+  ];
 ];
 
 End[] (* "`Private`" *)
@@ -38,9 +39,9 @@ RegisterNCProduct[NCProd];
 With[{NonCommutativeMultiply = NCProd},
 ClearAll[Suite];
 Suite[] := Describe["NCProduct",
-	Describe["Ordered product",
-		It["should auto-expand",
-			Expect[(a + b) ** c] @ ToBe[a ** c + b ** c],
+  Describe["Ordered product",
+    It["should auto-expand",
+      Expect[(a + b) ** c] @ ToBe[a ** c + b ** c],
 			Expect[a ** (b + c) ** d]
 				@ ToBe[a ** b ** d + a ** c ** d],
 			Expect[a ** (b + c + d)] @ ToBe[a ** b + a ** c + a ** d]
